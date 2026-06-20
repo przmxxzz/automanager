@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>AutoManager Pro</title>
+  
+  <!-- PWA – ustawienia aplikacji -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AutoManager">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0b1119">
+  <meta name="msapplication-TileColor" content="#0b1119">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  
+  <style>
+    /* ===== RESET & GLOBAL ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 30%, #1b2a3a, #0b1119 80%);
+      padding: 30px 24px 50px;
+      color: #eef4fa;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: -30%;
+      left: -20%;
+      width: 80%;
+      height: 80%;
+      background: radial-gradient(circle, rgba(90, 160, 255, 0.08), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* ===== SZKLANE ELEMENTY ===== */
+    .glass {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      transition: all 0.25s ease;
+    }
+    .glass:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 12px 56px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    }
+    
+    /* ===== HEADER ===== */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 30px;
+      padding: 12px 26px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+    }
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #a0d0ff, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header h1 small {
+      font-size: 0.9rem;
+      font-weight: 300;
+      opacity: 0.5;
+      -webkit-text-fill-color: rgba(255,255,255,0.3);
+    }
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    /* ===== PRZYCISKI ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e0ecf5;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-decoration: none;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+      font-family: inherit;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.30);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 120, 255, 0.20);
+    }
+    .btn-primary {
+      background: rgba(0, 150, 255, 0.20);
+      border-color: rgba(0, 180, 255, 0.40);
+      color: #b0dcff;
+    }
+    .btn-primary:hover {
+      background: rgba(0, 150, 255, 0.35);
+      border-color: #4aaaff;
+      box-shadow: 0 8px 40px rgba(0, 150, 255, 0.30);
+    }
+    .btn-danger {
+      border-color: rgba(255, 80, 80, 0.30);
+      color: #faa;
+    }
+    .btn-danger:hover {
+      background: rgba(255, 50, 50, 0.15);
+      border-color: #f66;
+    }
+    .btn-outline {
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    
+    /* ===== DASHBOARD ===== */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 20px;
+      padding: 18px 20px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+      transition: 0.25s;
+    }
+    .stat-card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.40);
+    }
+    .stat-card .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: rgba(255, 255, 255, 0.50);
+    }
+    .stat-card .value {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-top: 4px;
+      color: #f0f8ff;
+      text-shadow: 0 2px 12px rgba(0, 180, 255, 0.15);
+    }
+    .stat-card .value.green {
+      color: #7ddfb0;
+    }
+    .stat-card .value.blue {
+      color: #7bb9f0;
+    }
+    .stat-card .value.gold {
+      color: #f5d76e;
+    }
+    
+    /* ===== TOOLBAR ===== */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 14px 20px;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.20);
+    }
+    .toolbar select,
+    .toolbar input {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #dce8f2;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      outline: none;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+    .toolbar select option {
+      background: #1a2533;
+    }
+    .toolbar select:focus,
+    .toolbar input:focus {
+      border-color: rgba(100, 180, 255, 0.50);
+      box-shadow: 0 0 0 3px rgba(0, 150, 255, 0.15);
+    }
+    .toolbar .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .toolbar .filter-group label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.40);
+    }
+    
+    /* ===== KARTY AUT ===== */
+    .car-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 22px;
+    }
+    .car-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 24px;
+      padding: 18px 20px 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.30);
+      transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .car-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      border-color: rgba(255, 255, 255, 0.20);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    .car-card .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .car-card .title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #e4f0fa;
+      letter-spacing: -0.3px;
+    }
+    .car-card .title small {
+      font-weight: 400;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.45);
+      margin-left: 6px;
+    }
+    .car-card .favorite {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: 0.2s;
+      color: rgba(255, 215, 0, 0.2);
+      line-height: 1;
+      padding: 0 4px;
+    }
+    .car-card .favorite.active {
+      color: #f5d76e;
+      text-shadow: 0 0 20px #f5d76e66;
+    }
+    .car-card .favorite:hover {
+      transform: scale(1.2);
+    }
+    .car-card .status-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      font-size: 0.65rem;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(6px);
+      padding: 4px 14px;
+      border-radius: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.60);
+      letter-spacing: 0.3px;
+    }
+    .car-card .thumb {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin: 12px 0 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.20);
+    }
+    .car-card .thumb-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.02);
+      color: rgba(255, 255, 255, 0.15);
+      font-size: 0.85rem;
+      height: 140px;
+      border-radius: 16px;
+      border: 1px dashed rgba(255, 255, 255, 0.06);
+      margin: 12px 0 14px;
+    }
+    .car-card .details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.50);
+      margin-bottom: 8px;
+    }
+    .car-card .details span {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 3px 12px;
+      border-radius: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .car-card .profit-badge {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-top: 4px;
+    }
+    .profit {
+      color: #7ddfb0;
+    }
+    .loss {
+      color: #f88b8b;
+    }
+    .car-card .rating {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.35);
+      margin-top: 4px;
+    }
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 30px;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.60);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .modal {
+      background: rgba(20, 30, 44, 0.75);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+      max-width: 740px;
+      width: 100%;
+      max-height: 95vh;
+      overflow-y: auto;
+      padding: 28px 28px 30px;
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.60);
+      animation: slideUp 0.35s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal h2 {
+      font-weight: 500;
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #a0d0ff, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 18px;
+    }
+    .modal label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: rgba(255, 255, 255, 0.40);
+      margin-top: 14px;
+    }
+    .modal input,
+    .modal textarea,
+    .modal select {
+      width: 100%;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 40px;
+      color: #e4eff8;
+      font-size: 0.9rem;
+      margin-top: 4px;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+    .modal input:focus,
+    .modal textarea:focus,
+    .modal select:focus {
+      border-color: rgba(100, 180, 255, 0.50);
+      box-shadow: 0 0 0 4px rgba(0, 150, 255, 0.10);
+      outline: none;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .modal textarea {
+      border-radius: 20px;
+      resize: vertical;
+      min-height: 60px;
+    }
+    .modal .row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .modal .row>* {
+      flex: 1;
+      min-width: 140px;
+    }
+    .modal .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .modal .actions .btn {
+      flex: 1;
+      text-align: center;
+      justify-content: center;
+      min-width: 100px;
+    }
+    .modal .image-preview {
+      max-width: 100%;
+      max-height: 160px;
+      border-radius: 16px;
+      margin-top: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      object-fit: cover;
+    }
+    
+    /* ===== SZCZEGÓŁY ===== */
+    .detail-section {
+      margin-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      padding-top: 14px;
+    }
+    .detail-section h4 {
+      color: rgba(255, 255, 255, 0.60);
+      font-weight: 400;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(4px);
+      padding: 5px 14px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.75);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tag .remove-item {
+      color: rgba(255, 100, 100, 0.50);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.65rem;
+      transition: 0.15s;
+    }
+    .tag .remove-item:hover {
+      color: #f88;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 12px 16px;
+      border-radius: 18px;
+      margin: 10px 0;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .detail-grid div {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.70);
+      padding: 4px 0;
+    }
+    .detail-grid strong {
+      color: rgba(255, 255, 255, 0.35);
+      font-weight: 400;
+      margin-right: 4px;
+    }
+    
+    /* ===== WYKRES ===== */
+    .chart-container {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 24px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20);
+    }
+    .chart-container canvas {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 160px;
+      border-radius: 12px;
+    }
+    
+    /* ===== RESPONSYWNE ===== */
+    @media (max-width: 640px) {
+      body { padding: 16px 12px 30px; }
+      .header { flex-direction: column; align-items: stretch; padding: 14px 16px; }
+      .header h1 { font-size: 1.4rem; }
+      .dashboard { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card { padding: 14px 16px; }
+      .stat-card .value { font-size: 1.4rem; }
+      .toolbar { flex-direction: column; align-items: stretch; padding: 12px 16px; }
+      .car-grid { grid-template-columns: 1fr; gap: 16px; }
+      .modal { padding: 20px 16px; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .modal .row { flex-direction: column; }
+      .modal .row>* { min-width: unset; }
+    }
+    
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.10); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.20); }
+    
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container" id="app">
+    <!-- HEADER -->
+    <div class="header">
+      <h1>🚗 AutoManager <small>Pro</small></h1>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="openAddModal()">＋ Dodaj</button>
+        <button class="btn btn-outline" onclick="exportData()">⬇ Eksport</button>
+        <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">⬆ Import</button>
+        <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleImport(event)" />
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard" id="dashboard"></div>
+
+    <!-- WYKRES -->
+    <div class="chart-container">
+      <canvas id="profitChart" height="140"></canvas>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="filter-group">
+        <label>Marka</label>
+        <select id="filterBrand"><option value="">Wszystkie</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="filterStatus">
+          <option value="">Wszystkie</option>
+          <option value="W sprzedaży">W sprzedaży</option>
+          <option value="Sprzedane">Sprzedane</option>
+          <option value="Do naprawy">Do naprawy</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Cena od</label>
+        <input type="number" id="filterPriceMin" placeholder="0" style="width:70px" />
+        <label>do</label>
+        <input type="number" id="filterPriceMax" placeholder="999999" style="width:90px" />
+      </div>
+      <div class="filter-group" style="margin-left:auto;">
+        <label>Sortuj</label>
+        <select id="sortBy">
+          <option value="name">Nazwa A→Z</option>
+          <option value="name-desc">Nazwa Z→A</option>
+          <option value="price">Cena ↑</option>
+          <option value="price-desc">Cena ↓</option>
+          <option value="rating">Ocena ↑</option>
+          <option value="rating-desc">Ocena ↓</option>
+          <option value="profit">Zysk ↑</option>
+          <option value="profit-desc">Zysk ↓</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- LISTA AUT -->
+    <div class="car-grid" id="carGrid"></div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <script>
+    // ============================================================
+    //  DANE
+    // ============================================================
+    let cars = [];
+    let currentEditId = null;
+    let currentModalMode = 'add';
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem('automanager_v2');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) cars = parsed;
+        }
+      } catch (_) {}
+      if (cars.length === 0) {
+        cars = [{
+          id: Date.now() + 1,
+          brand: 'BMW',
+          model: 'X5',
+          year: 2019,
+          engine: '3.0 Diesel',
+          vin: 'WBA1234567890',
+          mileage: 82000,
+          country: 'Niemcy',
+          transmission: 'Automat',
+          power: 265,
+          fuel: 'Diesel',
+          priceBuy: 85000,
+          priceSell: 105000,
+          costs: 12000,
+          rating: 8,
+          status: 'W sprzedaży',
+          dateBuy: '2023-05-10',
+          dateSell: '',
+          pros: ['Niska awaryjność', 'Komfort', 'Przestronność'],
+          cons: ['Drogi serwis', 'Spalanie 10l'],
+          notes: 'Po zakupie wymiana oleju i filtrów. Auto w świetnym stanie.',
+          favorite: true,
+          image: ''
+        }, {
+          id: Date.now() + 2,
+          brand: 'Audi',
+          model: 'A6',
+          year: 2020,
+          engine: '2.0 TFSI',
+          vin: 'WAU87654321',
+          mileage: 45000,
+          country: 'USA',
+          transmission: 'Automat',
+          power: 190,
+          fuel: 'Benzyna',
+          priceBuy: 92000,
+          priceSell: 112000,
+          costs: 9000,
+          rating: 9,
+          status: 'Sprzedane',
+          dateBuy: '2023-02-15',
+          dateSell: '2023-11-20',
+          pros: ['Świetne prowadzenie', 'Design', 'Jakość wykończenia'],
+          cons: ['Elektronika', 'Części drogie'],
+          notes: 'Kupione z USA, VIN czysty. Sprzedane z zyskiem.',
+          favorite: false,
+          image: ''
+        }, {
+          id: Date.now() + 3,
+          brand: 'Mercedes',
+          model: 'E300',
+          year: 2021,
+          engine: '2.0 Hybrid',
+          vin: 'WDB11223344',
+          mileage: 28000,
+          country: 'Holandia',
+          transmission: 'Automat',
+          power: 204,
+          fuel: 'Hybryda',
+          priceBuy: 110000,
+          priceSell: 130000,
+          costs: 15000,
+          rating: 7,
+          status: 'W sprzedaży',
+          dateBuy: '2024-01-05',
+          dateSell: '',
+          pros: ['Ekonomia', 'Komfort', 'Nowoczesne wnętrze'],
+          cons: ['Bagażnik mniejszy', 'Serwis hybrydy'],
+          notes: 'Auto po przeglądzie. Idealne do miasta.',
+          favorite: true,
+          image: ''
+        }];
+        saveData();
+      }
+      renderAll();
+    }
+
+    function saveData() {
+      localStorage.setItem('automanager_v2', JSON.stringify(cars));
+    }
+
+    // ============================================================
+    //  RENDER
+    // ============================================================
+    function renderAll() {
+      updateDashboard();
+      updateChart();
+      populateBrandFilter();
+      applyFiltersAndSort();
+    }
+
+    function updateDashboard() {
+      const total = cars.length;
+      const totalProfit = cars.reduce((s, c) => s + (c.priceSell || 0) - (c.priceBuy || 0) - (c.costs || 0), 0);
+      const avgRating = total ? (cars.reduce((s, c) => s + (c.rating || 0), 0) / total) : 0;
+      const maxPrice = total ? Math.max(...cars.map(c => c.priceBuy || 0)) : 0;
+      document.getElementById('dashboard').innerHTML = `
+        <div class="stat-card"><div class="label">Liczba aut</div><div class="value blue">${total}</div></div>
+        <div class="stat-card"><div class="label">Średnia ocena</div><div class="value gold">${avgRating.toFixed(1)} ⭐</div></div>
+        <div class="stat-card"><div class="label">Łączny zysk</div><div class="value ${totalProfit >= 0 ? 'green' : ''}">${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(0)} zł</div></div>
+        <div class="stat-card"><div class="label">Najdroższy zakup</div><div class="value">${maxPrice.toFixed(0)} zł</div></div>
+      `;
+    }
+
+    function updateChart() {
+      const canvas = document.getElementById('profitChart');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const w = rect.width - 32;
+      const h = 140;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+      if (cars.length === 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.font = '13px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Brak danych', w / 2, h / 2 + 5);
+        return;
+      }
+      const data = cars.map(c => {
+        const profit = (c.priceSell || 0) - (c.priceBuy || 0) - (c.costs || 0);
+        return { label: c.brand + ' ' + c.model, profit };
+      }).sort((a, b) => b.profit - a.profit);
+      const maxProfit = Math.max(1, ...data.map(d => Math.abs(d.profit)));
+      const padding = { top: 8, bottom: 22, left: 30, right: 8 };
+      const chartW = w - padding.left - padding.right;
+      const chartH = h - padding.top - padding.bottom;
+      const barW = Math.min(34, chartW / data.length * 0.55);
+      ctx.font = '9px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      data.forEach((d, i) => {
+        const x = padding.left + (i / data.length) * chartW + chartW / data.length / 2 - barW / 2;
+        const barH = (Math.abs(d.profit) / maxProfit) * chartH * 0.88;
+        const y = d.profit >= 0 ? padding.top + chartH - barH : padding.top + chartH;
+        const gradient = ctx.createLinearGradient(x, y, x, y + barH);
+        if (d.profit >= 0) {
+          gradient.addColorStop(0, 'rgba(120, 220, 180, 0.85)');
+          gradient.addColorStop(1, 'rgba(80, 180, 140, 0.4)');
+        } else {
+          gradient.addColorStop(0, 'rgba(255, 120, 120, 0.85)');
+          gradient.addColorStop(1, 'rgba(200, 80, 80, 0.4)');
+        }
+        ctx.fillStyle = gradient;
+        ctx.shadowColor = d.profit >= 0 ? 'rgba(120,220,180,0.2)' : 'rgba(255,120,120,0.2)';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.roundRect(x, y, barW, barH, 4);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.textAlign = 'center';
+        ctx.fillText(d.profit >= 0 ? '+' + d.profit.toFixed(0) : d.profit.toFixed(0), x + barW / 2, y - 4);
+        ctx.fillStyle = 'rgba(255,255,255,0.20)';
+        ctx.font = '8px Inter, sans-serif';
+        const shortLabel = d.label.length > 10 ? d.label.substr(0, 9) + '…' : d.label;
+        ctx.fillText(shortLabel, x + barW / 2, padding.top + chartH + 14);
+      });
+    }
+
+    // roundRect
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (r > w/2) r = w/2;
+        if (r > h/2) r = h/2;
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        this.closePath();
+        return this;
+      };
+    }
+
+    function populateBrandFilter() {
+      const brands = [...new Set(cars.map(c => c.brand).filter(Boolean))].sort();
+      const sel = document.getElementById('filterBrand');
+      const current = sel.value;
+      sel.innerHTML = '<option value="">Wszystkie</option>' + brands.map(b => `<option value="${b}">${b}</option>`).join('');
+      if (current) sel.value = current;
+    }
+
+    function applyFiltersAndSort() {
+      const brand = document.getElementById('filterBrand').value;
+      const status = document.getElementById('filterStatus').value;
+      const priceMin = parseFloat(document.getElementById('filterPriceMin').value) || 0;
+      const priceMax = parseFloat(document.getElementById('filterPriceMax').value) || Infinity;
+      const sort = document.getElementById('sortBy').value;
+      let filtered = cars.filter(c => {
+        if (brand && c.brand !== brand) return false;
+        if (status && c.status !== status) return false;
+        const price = c.priceBuy || 0;
+        if (price < priceMin || price > priceMax) return false;
+        return true;
+      });
+      const sortMap = {
+        'name': (a, b) => (a.brand + a.model).localeCompare(b.brand + b.model),
+        'name-desc': (a, b) => (b.brand + b.model).localeCompare(a.brand + a.model),
+        'price': (a, b) => (a.priceBuy || 0) - (b.priceBuy || 0),
+        'price-desc': (a, b) => (b.priceBuy || 0) - (a.priceBuy || 0),
+        'rating': (a, b) => (a.rating || 0) - (b.rating || 0),
+        'rating-desc': (a, b) => (b.rating || 0) - (a.rating || 0),
+        'profit': (a, b) => {
+          const pa = (a.priceSell || 0) - (a.priceBuy || 0) - (a.costs || 0);
+          const pb = (b.priceSell || 0) - (b.priceBuy || 0) - (b.costs || 0);
+          return pa - pb;
+        },
+        'profit-desc': (a, b) => {
+          const pa = (a.priceSell || 0) - (a.priceBuy || 0) - (a.costs || 0);
+          const pb = (b.priceSell || 0) - (b.priceBuy || 0) - (b.costs || 0);
+          return pb - pa;
+        }
+      };
+      if (sortMap[sort]) filtered.sort(sortMap[sort]);
+      renderCars(filtered);
+    }
+
+    document.getElementById('filterBrand').addEventListener('change', applyFiltersAndSort);
+    document.getElementById('filterStatus').addEventListener('change', applyFiltersAndSort);
+    document.getElementById('filterPriceMin').addEventListener('input', applyFiltersAndSort);
+    document.getElementById('filterPriceMax').addEventListener('input', applyFiltersAndSort);
+    document.getElementById('sortBy').addEventListener('change', applyFiltersAndSort);
+
+    function renderCars(list) {
+      const grid = document.getElementById('carGrid');
+      if (list.length === 0) {
+        grid.innerHTML = `<div class="empty">🔍 Brak aut</div>`;
+        return;
+      }
+      grid.innerHTML = list.map(c => {
+        const profit = (c.priceSell || 0) - (c.priceBuy || 0) - (c.costs || 0);
+        const profitStr = profit >= 0 ? `<span class="profit">+${profit.toFixed(0)} zł</span>` :
+          `<span class="loss">${profit.toFixed(0)} zł</span>`;
+        const favClass = c.favorite ? 'active' : '';
+        const thumbHtml = c.image ? `<img class="thumb" src="${c.image}" alt="${c.brand} ${c.model}" loading="lazy" />` :
+          `<div class="thumb-placeholder">📷 brak zdjęcia</div>`;
+        return `
+          <div class="car-card" onclick="openDetailModal('${c.id}')">
+            <div class="top-row">
+              <div class="title">${c.brand} <small>${c.model}</small></div>
+              <button class="favorite ${favClass}" onclick="event.stopPropagation(); toggleFavorite('${c.id}')">★</button>
+            </div>
+            <div class="status-badge">${c.status || 'Brak'}</div>
+            ${thumbHtml}
+            <div class="details">
+              <span>${c.year || '?'}</span>
+              <span>${c.engine || '—'}</span>
+              <span>${c.mileage ? c.mileage + ' km' : '—'}</span>
+            </div>
+            <div class="profit-badge">Zysk: ${profitStr}</div>
+            <div class="rating">⭐ ${c.rating || '?'}/10</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleFavorite(id) {
+      const c = cars.find(x => x.id == id);
+      if (c) { c.favorite = !c.favorite; saveData(); applyFiltersAndSort(); }
+    }
+
+    // ============================================================
+    //  MODAL – FORMULARZ
+    // ============================================================
+    function openAddModal() {
+      currentModalMode = 'add';
+      currentEditId = null;
+      document.getElementById('modalContent').innerHTML = buildFormHTML(null);
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function openEditModal(id) {
+      const c = cars.find(x => x.id == id);
+      if (!c) return;
+      currentModalMode = 'edit';
+      currentEditId = id;
+      document.getElementById('modalContent').innerHTML = buildFormHTML(c);
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function buildFormHTML(c) {
+      const isEdit = !!c;
+      const d = c || { brand: '', model: '', year: '', engine: '', vin: '', mileage: '', country: '', transmission: '', power: '', fuel: '', priceBuy: '', priceSell: '', costs: '', rating: 5, status: 'W sprzedaży', dateBuy: '', dateSell: '', pros: [], cons: [], notes: '', favorite: false, image: '' };
+      const prosStr = (d.pros || []).join(', ');
+      const consStr = (d.cons || []).join(', ');
+      const imgPreview = d.image ? `<img class="image-preview" src="${d.image}" alt="zdjęcie" />` : '';
+      return `
+        <h2>${isEdit ? '✏️ Edytuj auto' : '➕ Nowe auto'}</h2>
+        <div class="row">
+          <label>Marka <input id="fBrand" value="${d.brand}" placeholder="np. BMW" /></label>
+          <label>Model <input id="fModel" value="${d.model}" placeholder="np. X5" /></label>
+        </div>
+        <div class="row">
+          <label>Rok <input id="fYear" value="${d.year}" placeholder="2019" /></label>
+          <label>Silnik <input id="fEngine" value="${d.engine}" placeholder="3.0 Diesel" /></label>
+        </div>
+        <div class="row">
+          <label>VIN <input id="fVin" value="${d.vin}" placeholder="WBA..." /></label>
+          <label>Przebieg (km) <input id="fMileage" value="${d.mileage}" placeholder="82000" /></label>
+        </div>
+        <div class="row">
+          <label>Kraj <input id="fCountry" value="${d.country}" placeholder="Niemcy" /></label>
+          <label>Skrzynia <input id="fTransmission" value="${d.transmission}" placeholder="Automat" /></label>
+        </div>
+        <div class="row">
+          <label>Moc (KM) <input id="fPower" value="${d.power}" placeholder="265" /></label>
+          <label>Paliwo <input id="fFuel" value="${d.fuel}" placeholder="Diesel" /></label>
+        </div>
+        <div class="row">
+          <label>Cena zakupu (PLN) <input id="fPriceBuy" value="${d.priceBuy}" placeholder="85000" /></label>
+          <label>Cena sprzedaży <input id="fPriceSell" value="${d.priceSell}" placeholder="105000" /></label>
+        </div>
+        <div class="row">
+          <label>Koszty <input id="fCosts" value="${d.costs}" placeholder="12000" /></label>
+          <label>Ocena (1-10) <input id="fRating" value="${d.rating}" type="number" min="1" max="10" /></label>
+        </div>
+        <div class="row">
+          <label>Status <select id="fStatus">
+            <option value="W sprzedaży" ${d.status === 'W sprzedaży' ? 'selected' : ''}>W sprzedaży</option>
+            <option value="Sprzedane" ${d.status === 'Sprzedane' ? 'selected' : ''}>Sprzedane</option>
+            <option value="Do naprawy" ${d.status === 'Do naprawy' ? 'selected' : ''}>Do naprawy</option>
+          </select></label>
+          <label>Data zakupu <input id="fDateBuy" value="${d.dateBuy}" type="date" /></label>
+          <label>Data sprzedaży <input id="fDateSell" value="${d.dateSell}" type="date" /></label>
+        </div>
+        <label>Zalety (oddziel przecinkiem) <input id="fPros" value="${prosStr}" placeholder="np. Niska awaryjność, Komfort" /></label>
+        <label>Wady (oddziel przecinkiem) <input id="fCons" value="${consStr}" placeholder="np. Drogi serwis, Spalanie" /></label>
+        <label>Notatki <textarea id="fNotes" rows="3">${d.notes || ''}</textarea></label>
+        <label>Zdjęcie (URL lub base64) <input id="fImage" value="${d.image}" placeholder="data:image/jpeg;base64,..." />
+          <div id="imagePreviewContainer">${imgPreview}</div>
+        </label>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="saveCarFromForm()">💾 Zapisz</button>
+          <button class="btn" onclick="closeModal()">Anuluj</button>
+          ${isEdit ? `<button class="btn btn-danger" onclick="deleteCar('${c.id}')">🗑 Usuń</button>` : ''}
+        </div>
+      `;
+    }
+
+    document.addEventListener('input', function(e) {
+      if (e.target.id === 'fImage') {
+        const container = document.getElementById('imagePreviewContainer');
+        if (container) {
+          const val = e.target.value.trim();
+          if (val) container.innerHTML = `<img class="image-preview" src="${val}" alt="podgląd" onerror="this.style.display='none'" />`;
+          else container.innerHTML = '';
+        }
+      }
+    });
+
+    function saveCarFromForm() {
+      const brand = document.getElementById('fBrand').value.trim();
+      const model = document.getElementById('fModel').value.trim();
+      if (!brand || !model) { alert('Marka i model są wymagane.'); return; }
+      const obj = {
+        brand, model,
+        year: document.getElementById('fYear').value.trim(),
+        engine: document.getElementById('fEngine').value.trim(),
+        vin: document.getElementById('fVin').value.trim(),
+        mileage: parseFloat(document.getElementById('fMileage').value) || 0,
+        country: document.getElementById('fCountry').value.trim(),
+        transmission: document.getElementById('fTransmission').value.trim(),
+        power: parseFloat(document.getElementById('fPower').value) || 0,
+        fuel: document.getElementById('fFuel').value.trim(),
+        priceBuy: parseFloat(document.getElementById('fPriceBuy').value) || 0,
+        priceSell: parseFloat(document.getElementById('fPriceSell').value) || 0,
+        costs: parseFloat(document.getElementById('fCosts').value) || 0,
+        rating: parseInt(document.getElementById('fRating').value) || 5,
+        status: document.getElementById('fStatus').value,
+        dateBuy: document.getElementById('fDateBuy').value,
+        dateSell: document.getElementById('fDateSell').value,
+        pros: document.getElementById('fPros').value.split(',').map(s => s.trim()).filter(Boolean),
+        cons: document.getElementById('fCons').value.split(',').map(s => s.trim()).filter(Boolean),
+        notes: document.getElementById('fNotes').value.trim(),
+        image: document.getElementById('fImage').value.trim(),
+        favorite: false
+      };
+      if (currentModalMode === 'add') {
+        obj.id = Date.now() + Math.random() * 10000;
+        cars.push(obj);
+      } else {
+        const idx = cars.findIndex(x => x.id == currentEditId);
+        if (idx >= 0) {
+          obj.id = currentEditId;
+          obj.favorite = cars[idx].favorite || false;
+          cars[idx] = obj;
+        }
+      }
+      saveData();
+      closeModal();
+      renderAll();
+    }
+
+    // ============================================================
+    //  MODAL – SZCZEGÓŁY
+    // ============================================================
+    function openDetailModal(id) {
+      const c = cars.find(x => x.id == id);
+      if (!c) return;
+      currentModalMode = 'detail';
+      currentEditId = id;
+      const profit = (c.priceSell || 0) - (c.priceBuy || 0) - (c.costs || 0);
+      const profitStr = profit >= 0 ? `<span class="profit">+${profit.toFixed(0)} zł</span>` :
+        `<span class="loss">${profit.toFixed(0)} zł</span>`;
+      let html = `
+        <h2>${c.brand} ${c.model} <span style="font-size:1rem;color:rgba(255,255,255,0.25);">${c.year}</span></h2>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:6px;color:rgba(255,255,255,0.65);font-size:0.9rem;">
+          <span><strong>⭐</strong> ${c.rating}/10</span>
+          <span><strong>Zysk:</strong> ${profitStr}</span>
+          <span><strong>Status:</strong> ${c.status || '—'}</span>
+        </div>
+        ${c.image ? `<img class="image-preview" src="${c.image}" alt="zdjęcie" style="max-height:180px;" />` : ''}
+        <div class="detail-grid">
+          <div><strong>VIN:</strong> ${c.vin || '—'}</div>
+          <div><strong>Przebieg:</strong> ${c.mileage ? c.mileage + ' km' : '—'}</div>
+          <div><strong>Silnik:</strong> ${c.engine || '—'}</div>
+          <div><strong>Moc:</strong> ${c.power ? c.power + ' KM' : '—'}</div>
+          <div><strong>Skrzynia:</strong> ${c.transmission || '—'}</div>
+          <div><strong>Paliwo:</strong> ${c.fuel || '—'}</div>
+          <div><strong>Kraj:</strong> ${c.country || '—'}</div>
+          <div><strong>Data zakupu:</strong> ${c.dateBuy || '—'}</div>
+          <div><strong>Data sprzedaży:</strong> ${c.dateSell || '—'}</div>
+          <div><strong>Cena zakupu:</strong> ${c.priceBuy || 0} zł</div>
+          <div><strong>Cena sprzedaży:</strong> ${c.priceSell || 0} zł</div>
+          <div><strong>Koszty:</strong> ${c.costs || 0} zł</div>
+        </div>
+      `;
+      html += `<div class="detail-section"><h4>✅ Zalety <span style="font-size:0.75rem;cursor:pointer;color:rgba(100,220,180,0.6);background:none;border:none;" onclick="addListItem('${c.id}','pros')">＋ dodaj</span></h4>
+        <div class="tag-list">${(c.pros||[]).map(p => `<span class="tag">${p} <span class="remove-item" onclick="removeListItem('${c.id}','pros','${p}')">✕</span></span>`).join('') || '<span style="color:rgba(255,255,255,0.15);font-size:0.8rem;">brak</span>'}</div>
+      </div>`;
+      html += `<div class="detail-section"><h4>❌ Wady <span style="font-size:0.75rem;cursor:pointer;color:rgba(255,150,150,0.6);background:none;border:none;" onclick="addListItem('${c.id}','cons')">＋ dodaj</span></h4>
+        <div class="tag-list">${(c.cons||[]).map(p => `<span class="tag">${p} <span class="remove-item" onclick="removeListItem('${c.id}','cons','${p}')">✕</span></span>`).join('') || '<span style="color:rgba(255,255,255,0.15);font-size:0.8rem;">brak</span>'}</div>
+      </div>`;
+      if (c.notes) {
+        html += `<div class="detail-section"><h4>📝 Notatki</h4><p style="background:rgba(255,255,255,0.02);padding:10px 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.03);">${c.notes}</p></div>`;
+      }
+      html += `
+        <div class="actions" style="margin-top:22px;">
+          <button class="btn" onclick="openEditModal('${c.id}')">✏️ Edytuj</button>
+          <button class="btn btn-danger" onclick="deleteCar('${c.id}')">🗑 Usuń</button>
+          <button class="btn" onclick="closeModal()">Zamknij</button>
+        </div>
+      `;
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    // ============================================================
+    //  MANIPULACJA LISTAMI
+    // ============================================================
+    function addListItem(id, type) {
+      const val = prompt(`Dodaj ${type === 'pros' ? 'zaletę' : 'wadę'}:`);
+      if (!val || !val.trim()) return;
+      const c = cars.find(x => x.id == id);
+      if (!c) return;
+      if (!c[type]) c[type] = [];
+      c[type].push(val.trim());
+      saveData();
+      openDetailModal(id);
+      applyFiltersAndSort();
+    }
+
+    function removeListItem(id, type, value) {
+      const c = cars.find(x => x.id == id);
+      if (!c) return;
+      c[type] = (c[type] || []).filter(x => x !== value);
+      saveData();
+      openDetailModal(id);
+      applyFiltersAndSort();
+    }
+
+    // ============================================================
+    //  USUWANIE
+    // ============================================================
+    function deleteCar(id) {
+      if (!confirm('Na pewno usunąć to auto?')) return;
+      cars = cars.filter(x => x.id != id);
+      saveData();
+      closeModal();
+      renderAll();
+    }
+
+    // ============================================================
+    //  MODAL – zamknij
+    // ============================================================
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    // ============================================================
+    //  EXPORT / IMPORT
+    // ============================================================
+    function exportData() {
+      const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'automanager_backup.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function handleImport(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (Array.isArray(data)) {
+            cars = data;
+            saveData();
+            renderAll();
+            alert('✅ Zaimportowano ' + cars.length + ' aut.');
+          } else alert('❌ Nieprawidłowy format.');
+        } catch (_) { alert('❌ Błąd odczytu pliku.'); }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    // ============================================================
+    //  RESIZE
+    // ============================================================
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updateChart, 300);
+    });
+
+    // ============================================================
+    //  START
+    // ============================================================
+    loadData();
+
+    // globalne
+    window.openAddModal = openAddModal;
+    window.openEditModal = openEditModal;
+    window.openDetailModal = openDetailModal;
+    window.saveCarFromForm = saveCarFromForm;
+    window.deleteCar = deleteCar;
+    window.closeModal = closeModal;
+    window.exportData = exportData;
+    window.handleImport = handleImport;
+    window.toggleFavorite = toggleFavorite;
+    window.addListItem = addListItem;
+    window.removeListItem = removeListItem;
+  </script>
+</body>
+</html>
